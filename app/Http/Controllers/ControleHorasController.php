@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\ControleHoras;
 use Illuminate\Http\Request;
 
+use function Ramsey\Uuid\v1;
+
 class ControleHorasController extends Controller
 {
     /**
@@ -15,26 +17,57 @@ class ControleHorasController extends Controller
     //dd($hora);   
       
     $horarios = array("DS","DC","FO","BH");
-    $bhoras = ControleHoras::where([['user_id',auth()->user()->id],['horarios','BH']])->pluck('horas')->toArray();
+    $bh = ControleHoras::where([['user_id',auth()->user()->id],['horarios','BH']])->pluck('horas')->toArray();
 
-    $folgads = ControleHoras::where([['user_id',auth()->user()->id],['horarios','DS']])->pluck('horas')->toArray();
+    $ds = ControleHoras::where([['user_id',auth()->user()->id],['horarios','DS']])->pluck('horas')->toArray();
         
-    $ex = ControleHoras::where([['user_id',auth()->user()->id],['horarios','DC']])->OrWhere([['user_id',auth()->user()->id],['horarios','FO']])->OrWhere([['user_id',auth()->user()->id],['horarios','DS']])->pluck('horas')->toArray();
+    $extra = ControleHoras::where([['user_id',auth()->user()->id],['horarios','DC']])->OrWhere([['user_id',auth()->user()->id],['horarios','FO']])->OrWhere([['user_id',auth()->user()->id],['horarios','DS']])->pluck('horas')->toArray();
 
-    $horas = ControleHoras::where('user_id',auth()->user()->id)->get();
+    $horas = ControleHoras::where('user_id',auth()->user()->id)->orderBy('data')->get();
 
-    $extra = array_sum($ex);
-    $bh = array_sum($bhoras);
-    $ds = array_sum($folgads);
-
-    $oh = "4.645";
+    $extrapago = ControleHoras::where([['user_id',auth()->user()->id],['pago','1']])->pluck('horas')->toArray();
+        
+    $sum = strtotime('00:00:00');
+    $totalextra = 0;
+    $totalbh = 0;
+    $totalds = 0;
+    $totalextrapaga = 0;
+    foreach ($extra as $element ) {
+    $timeinsec = strtotime($element) - $sum;
+    $totalextra = $totalextra + $timeinsec;
+    }
+    $extra = ($totalextra / 3600);
     
-    $valor_receber = (($extra * $oh)* 2);  
+    foreach ($bh as $element ) {
+     $timeinsec = strtotime($element) - $sum;
+     $totalbh = $totalbh + $timeinsec;
+     }
+     $bh = ($totalbh / 3600);
+     
+     foreach ($ds as $element ) {
+     $timeinsec = strtotime($element) - $sum;
+     $totalds = $totalds + $timeinsec;
+     }
+     $ds = ($totalds / 3600);
+
+     foreach ($extrapago as $element ) {
+     $timeinsec = strtotime($element) - $sum; 
+     $totalextrapaga = $totalextrapaga + $timeinsec;
+     }
+    $extrapago = ($totalextrapaga / 3600);
+    
+
+    $oh = "10.685";
+    $extra = ($extra - $extrapago);
+    $valor_recebido = ($extrapago * $oh);
+    $valor_receber = ($extra  * $oh);
     $bancohoras = ($bh + $ds);
     $valor_receber_bh = ($bancohoras * $oh);
-        
-        
-        return view('horas', compact("valor_receber_bh","valor_receber","horarios","extra","bancohoras","horas"));
+    $valor_receber_bh = number_format($valor_receber_bh,2, ".", ",");
+    $valor_recebido = number_format($valor_recebido,2, ".", ",");
+    $valor_receber = number_format($valor_receber,2, ".", ","); 
+    
+        return view('horas', compact("oh","valor_recebido","valor_receber_bh","valor_receber","horarios","extra","bancohoras","horas"));
     }
 
     /**
@@ -48,9 +81,10 @@ class ControleHorasController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    
     public function store(Request $request)
-    {
-        
+    {             
+
        $horario = ControleHoras::create($request->all());
 
         return redirect()->back();//route('horas.index');
@@ -69,27 +103,59 @@ class ControleHorasController extends Controller
      */
     public function edit(ControleHoras $hora)
     {
+        //dd($hora);
+    $horarios = array("DS","DC","FO","BH");
+    $bh = ControleHoras::where([['user_id',auth()->user()->id],['horarios','BH']])->pluck('horas')->toArray();
+
+    $ds = ControleHoras::where([['user_id',auth()->user()->id],['horarios','DS']])->pluck('horas')->toArray();
         
-        $horarios = array("DS","DC","FO","BH");
-        $bhoras = ControleHoras::where([['user_id',auth()->user()->id],['horarios','BH']])->pluck('horas')->toArray();
+    $extra = ControleHoras::where([['user_id',auth()->user()->id],['horarios','DC']])->OrWhere([['user_id',auth()->user()->id],['horarios','FO']])->OrWhere([['user_id',auth()->user()->id],['horarios','DS']])->pluck('horas')->toArray();
+
+    $horas = ControleHoras::where('user_id',auth()->user()->id)->orderBy('data')->get();
+
+    $extrapago = ControleHoras::where([['user_id',auth()->user()->id],['pago','1']])->pluck('horas')->toArray();
+
+    $sum = strtotime('00:00:00');
+    $totalextra = 0;
+    $totalbh = 0;
+    $totalds = 0;
+    $totalextrapaga = 0;
+    foreach ($extra as $element ) {
+    $timeinsec = strtotime($element) - $sum;
+    $totalextra = $totalextra + $timeinsec;
+    }
+    $extra = ($totalextra / 3600);
     
-        $folgads = ControleHoras::where([['user_id',auth()->user()->id],['horarios','DS']])->pluck('horas')->toArray();
-            
-        $ex = ControleHoras::where([['user_id',auth()->user()->id],['horarios','DC']])->OrWhere([['user_id',auth()->user()->id],['horarios','FO']])->OrWhere([['user_id',auth()->user()->id],['horarios','DS']])->pluck('horas')->toArray();
+    foreach ($bh as $element ) {
+     $timeinsec = strtotime($element) - $sum;
+     $totalbh = $totalbh + $timeinsec;
+     }
+     $bh = ($totalbh / 3600);
+     
+     foreach ($ds as $element ) {
+     $timeinsec = strtotime($element) - $sum;
+     $totalds = $totalds + $timeinsec;
+     }
+     $ds = ($totalds / 3600);
+
+     foreach ($extrapago as $element ) {
+     $timeinsec = strtotime($element) - $sum; 
+     $totalextrapaga = $totalextrapaga + $timeinsec;
+     }
+    $extrapago = ($totalextrapaga / 3600);
     
-        $horas = ControleHoras::where('user_id',auth()->user()->id)->get();
+
+    $oh = "10.685";
+    $extra = ($extra - $extrapago);
+    $valor_recebido = ($extrapago * $oh);
+    $valor_receber = ($extra  * $oh);
+    $bancohoras = ($bh + $ds);
+    $valor_receber_bh = ($bancohoras * $oh);
+    $valor_receber_bh = number_format($valor_receber_bh,2, ".", ",");
+    $valor_recebido = number_format($valor_recebido,2, ".", ",");
+    $valor_receber = number_format($valor_receber,2, ".", ",");  
     
-        $extra = array_sum($ex);
-        $bh = array_sum($bhoras);
-        $ds = array_sum($folgads);
-        $oh = "4.645";
-    
-        $valor_receber = ($extra + $oh);  
-        $bancohoras = ($bh + $ds);
-        $valor_receber_bh = ($bancohoras + $oh);
-        
-        
-            return view('horas', compact("valor_receber_bh","valor_receber","horarios","extra","bancohoras","horas","hora"));
+        return view('horas', compact("hora","oh","valor_recebido","valor_receber_bh","valor_receber","horarios","extra","bancohoras","horas"));
     }
 
     /**
@@ -97,10 +163,21 @@ class ControleHorasController extends Controller
      */
     public function update(Request $request, ControleHoras $hora)
     {
-
+       
+       if (isset($request->pago)) {
         $hora->update($request->all());
+       }else {
+        $hora->update([
+            "data" => $request->input("data"),
+            "horarios" => $request->input("horarios"),
+            "horas" => $request->input("horas"),
+            "pago" => NULL,
+        ]);
+        
+       } 
+       
 
-        return redirect()->back();
+        return redirect()->route("horas.index");
     }
 
     /**
