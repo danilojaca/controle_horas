@@ -16,6 +16,9 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth')->get('/', function () {
     return redirect()->route('horas.index');
 });
+Route::middleware('auth')->get('/home', function () {
+    return redirect()->route('horas.index');
+});
 
 Auth::routes();
 
