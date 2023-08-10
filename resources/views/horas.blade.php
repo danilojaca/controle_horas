@@ -81,10 +81,10 @@
                     </div>
                     <div class="col-md-2 pt-2">
                         <input type="checkbox" class="form-check-input" name="pago" value="1"{{$hora->pago == "1" ? "checked" :""}}>
-                        <label>Pago</label>
+                        <label>{{"Pago"}}</label>
                     </div>
                     <div class="col-md-1">
-                        <button type="submit" class="btn btn-primary">Editar</button>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-pencil-square"></i></button>
                     </div>
                     </div>
             </form>
@@ -111,10 +111,10 @@
                     </div>
                     <div class="col-md-2 pt-2">
                         <input type="checkbox" class="form-check-input" name="pago" value="1">
-                        <label>Pago</label>
+                        <label>{{"Pago"}}</label>
                     </div>
                     <div class="col-md-1">
-                        <button type="submit" class="btn btn-primary">Adicionar</button>
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-plus-lg"></i></button>
                    </div>
                 
                 </div>                  
@@ -130,14 +130,14 @@
             <table class="table table-bordered table-sm" id="myTable">
                 <thead>
                     <tr>
-                        <th colspan="6" style='text-align:center' >Horas Extras Totais</th>
+                        <th colspan="6" style='text-align:center' >{{"Horas Extras Totais"}}</th>
                     </tr>
                     <tr>
-                        <th >Data</th>
-                        <th >Horario</th>
-                        <th >Horas</th>
-                        <th >Status</th>
-                        <th>Valor Estimado</th>
+                        <th >{{"Data"}}</th>
+                        <th >{{"Horario"}}</th>
+                        <th >{{"Horas"}}</th>
+                        <th >{{"Status"}}</th>
+                        <th>{{"Valor Estimado"}}</th>
                         <th></th>
                     </tr>
                                
@@ -156,7 +156,7 @@
                         {{$data}}</td>
                         <td>{{$hora->horarios}}</td> 
                         <td>{{$hora->horas}}</td> 
-                        <td>{{$hora->pago == "1" ? "Pago" : ($hora->horarios == "BH" ? "Pago no Final do Contrato" : "Não Pago")}}</td>
+                        <td>{{$hora->horarios == "BH" ? "Pago no Final do Contrato": ($hora->pago == "1" ? "Pago"  : "Não Pago")}}</td>
                         <td>
                         @php 
                                 $sum = strtotime('00:00:00');
@@ -172,11 +172,11 @@
                          </td>
                         <td>
                         <div class="btn-group">          
-                                <button class="btn btn-outline-light text-dark" onclick="window.location.href='{{route('horas.edit', ['hora' => $hora->id])}}';">edit</button>
+                                <button class="btn btn-outline-light text-dark" onclick="window.location.href='{{route('horas.edit', ['hora' => $hora->id])}}';"><i class="bi bi-pencil-square"></i></button>
                             <form method="post" action="{{route("horas.destroy", ["hora" => $hora->id])}}">
                             @method("DELETE")
                             @csrf
-                                <button class="btn btn-outline-light text-dark" type="submit">delete</button>           
+                                <button class="btn btn-outline-light text-dark" type="submit"><i class="bi bi-trash"></i></button>           
                             </form>
                         </div>
                     </td>
