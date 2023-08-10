@@ -225,8 +225,9 @@ function timePassed(time) {
         var n1 = hours;
         var n2 = mins/60;
         var n3 = Number(n1) + Number(n2);
+        var n4 = n3 * 10.685;
        
-        document.getElementById('valor').value = n3 * 10.685 ;
+        document.getElementById('valor').value = new Intl.NumberFormat("pt-PT", { style: "currency", currency: "EUR" }).format(n4) ;
 }
        
   
